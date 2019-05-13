@@ -1,0 +1,17 @@
+{
+  "name": "testbed",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "pm2 start pm2_configs/config.json",
+    "dev": "pm2-dev start pm2_configs/config.json"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.4",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1",
+    "redis": "^2.8.0"
+  }
+}
