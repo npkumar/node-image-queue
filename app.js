@@ -4,27 +4,19 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
 var imagesRouter = require('./routes/images');
-var bb = require('express-busboy');
 
-var app = express();
-// bb.extend(app, {
-//   upload: true,
-//   path: './uploads/',
-//   allowedPath: /./
-// });
+const app = express();
+
+// Middlewares
 app.use(boom());
-
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.use('/', indexRouter);
+// Routers
 app.use('/image', imagesRouter);
 
 module.exports = app;

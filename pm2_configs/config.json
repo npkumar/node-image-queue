@@ -8,6 +8,11 @@
     "env": {
       "PORT": 3000,
       "MONITORING": false
-    },
+    }
+  }, {
+    "name"       : "imageWorker",
+    "script"     : "./workers/imageWorker.js",
+    "instances"  : 1,
+    "merge_logs" : true
   }]
 }
