@@ -1,18 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const client = require('../services/redis');
+var multer = require('multer');
+const upload = multer({ dest: './uploads/' })
+const im = require('imagemagick');
+const sharp = require('sharp');
 
 router.get('/:id/thumbnail', function(req, res, next) {
-  res.send('You provided: ' + req.params.id);
+  return client.getAsync(req.params.id).then(data => {
+    if (data !== null) {
+      res.send(data);
+    } else {
+      res.boom.notFound('ID not found!');
+    }
+  })
 });
 
-router.post('/', function(req, res, next) {
-  console.log(req.body)
-  res.send('You provided: ' + req.body.id);
+router.post('/', upload.single('image'), function(req, res, next) {
+  res.json(req.file);
 });
 
 module.exports = router;
