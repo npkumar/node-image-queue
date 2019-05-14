@@ -17,6 +17,6 @@ app:
     - REDIS_URL=redis://cache
     - NODE_ENV=development
     - PORT=3000
-  command:
-    sh -c 'npm i && node server.js'
+  entrypoint:
+    - /usr/local/bin/docker-entrypoint.sh
 
