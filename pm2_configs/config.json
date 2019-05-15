@@ -1,6 +1,6 @@
 {
   "apps" : [{
-    "name"        : "testbed",
+    "name"        : "app",
     "script"      : "./bin/www",
     "exec_mode"   : "cluster",
     "instances" : 1,

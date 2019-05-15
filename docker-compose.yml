@@ -1,22 +1,24 @@
-redis:
-  image: redis
-  container_name: cache
-  expose:
-    - 6379
-  ports:
-    - 6379:6379
-app:
-  build: ./
-  volumes:
-    - ./:/var/www/app
-  links:
-    - redis
-  ports:
-    - 3000:3000
-  environment:
-    - REDIS_URL=redis://cache
-    - NODE_ENV=development
-    - PORT=3000
-  entrypoint:
-    - /usr/local/bin/docker-entrypoint.sh
+version: '2.1'
+
+services:
+  redis:
+    build: ./redis
+    container_name: cache
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+
+  app:
+    depends_on:
+      - redis
+    build: ./
+    command: ["-c", "/opt/wait-for-redis.sh cache 6379"]
+    entrypoint: ["/bin/sh"]
+    volumes:
+      - ./:/var/www/app
+    links:
+      - redis
+    ports:
+      - 3000:3000
 
