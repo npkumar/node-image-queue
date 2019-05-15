@@ -13,7 +13,7 @@ services:
     depends_on:
       - redis
     build: ./
-    command: ["-c", "/opt/wait-for-redis.sh cache 6379"]
+    command: ["-c", "/opt/wait-for-redis.sh cache 6379 && npm run start-docker"]
     entrypoint: ["/bin/sh"]
     volumes:
       - ./:/var/www/app

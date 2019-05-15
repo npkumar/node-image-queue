@@ -17,12 +17,12 @@ const setResizedImagePath = (job, done) => {
     logger.info(data);
 
     try {
-      fs.unlinkSync(process.cwd() + path.sep + 'uploads' + path.sep + job.data.filename);
+      fs.unlinkSync(process.cwd() + path.sep + 'public' + path.sep + 'images' + path.sep + job.data.filename);
     } catch(err) {
       logger.error(err)
     }
 
-    return client.setAsync(job.data.filename, process.cwd() + path.sep + 'uploadsResized' + path.sep + job.data.filename + '.' + job.data.extension)
+    return client.setAsync(job.data.filename, 'localhost:3000/images/resized/' + job.data.filename + '.' + job.data.extension)
   })
   .catch((err) => {
     logger.error(err)
@@ -34,7 +34,7 @@ const setResizedImagePath = (job, done) => {
 
 
 const resizeImage = (filename, extension) => {
-  return sharp(process.cwd() + path.sep + 'uploads' + path.sep + filename)
+  return sharp(process.cwd() + path.sep + 'public' + path.sep + 'images' + path.sep + filename)
     .resize({ width: 100, height: 100 })
-    .toFile(process.cwd() + path.sep + 'uploadsResized' + path.sep + filename + '.' + extension);
+    .toFile(process.cwd() + path.sep + 'public' + path.sep + 'images' + path.sep + 'resized' + path.sep + filename + '.' + extension);
 };

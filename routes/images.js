@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require('path');
 
 const multer = require('multer');
-const upload = multer({ dest: process.cwd() + path.sep + 'uploads' })
+const upload = multer({ dest: process.cwd() + path.sep + 'public' + path.sep + 'images' })
 
 const client = require('../services/redis');
 const queue = require('../services/queue');
