@@ -7,4 +7,5 @@ const logger = winston.createLogger({
   ],
 });
 
+// Export basic winston logger.
 module.exports = logger;

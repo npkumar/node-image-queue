@@ -7,40 +7,63 @@ const upload = require('../services/upload');
 const logger = require('../utils/logger');
 
 /**
+ * @api {get} /image/:id/thumbnail Request PNG thumbnail version of an image
  *
+ * @apiParam {Number} id Image unique ID.
+ *
+ * @apiSuccess {Object}  data           PNG thumbnail information.
+ * @apiSuccess {String}  data.url       Public access url of thumbnail image.
+ *
+ * @apiSuccess {Object}  data           PNG thumbnail information.
+ * @apiSuccess {String}  data.message   Image is still being processed. Status message.
+ *
+ * @apiError 404 Request image Id is not found.
+ * @apiError 500 Server error.
  */
 router.get('/:id/thumbnail', (req, res) => {
-  return client.getAsync(req.params.id)
+  const imageId = req.params.id;
+  return client.getAsync(imageId)
     .then(data => {
       if (data === null) {
         // Returns 404
-        res.boom.notFound('Image ID not found!');
+        logger.debug(`Image ID ${imageId} not found!`);
+        res.boom.notFound(`Image ID ${imageId} not found!`);
       } else if (data === '') {
         // Accepted. But image is not ready yet.
+        logger.debug(`Image ${imageId} is being processed. Please try again later!`);
         res.status(202).json({
-          message: 'Image is being processed. Please try again later!',
+          message: `Image ${imageId} is being processed. Please try again later!`,
         });
       } else {
         res.json({url: data});
       }
     })
-    .catch(err => {
+    .catch(({message}) => {
       // Respond with 500 internal error
-      res.boom.badImplementation(err.message);
+      logger.error(message);
+      res.boom.badImplementation(message);
     });
 });
 
 /**
+ * @api {post} /image/ Sumbit an image for processing to PNG thumbnail
  *
+ * @apiParam {String} image Image file attached as form data.
+ *
+ * @apiSuccess {Object}  data      PNG thumbnail information.
+ * @apiSuccess {String}  data.id   Unique ID to fetch thumbnail information.
+ *
+ * @apiError 500 Server error.
  */
 router.post('/', upload.single('image'), (req, res) => {
   const [filename, extension] = req.file.filename.split('.');
   try {
     // Create an image job
+    logger.info(`Creating a`);
     queue.create('image', {filename, extension})
       .removeOnComplete(true) // Remove job from queue if completed.
       .attempts(5) // Max retries for the job
-      .backoff({delay: 60*1000, type: 'exponential'})
+      .backoff({delay: 60*1000, type: 'exponential'}) // re-attempt delay.
       .save() // Save to redis.
       .on('complete', result => logger.info(`Job completed with data ${result}`))
       .on('progress', (progress, data) => logger.info(`\r  job #${job.id} ${progress}% complete with data ${data}`))
@@ -48,9 +71,10 @@ router.post('/', upload.single('image'), (req, res) => {
 
     // Set empty value for ID. This indicates that image is being processed.
     client.setAsync(filename, '');
-  } catch (err) {
+  } catch ({message}) {
     // Respond with 500 internal error
-    res.boom.badImplementation(err.message);
+    logger.error(message);
+    res.boom.badImplementation(message);
   }
 
   // Send status 200 with ID for image.

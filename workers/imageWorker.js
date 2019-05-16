@@ -19,14 +19,14 @@ const setResizedImagePath = (job, done) => {
 
       try {
         fs.unlinkSync(util.getUploadPath(filename, extension));
-      } catch (err) {
-        logger.error(err.message);
+      } catch ({message}) {
+        logger.error(message);
       }
 
       return client.setAsync(filename, util.getFileDownloadPath(filename));
     })
-    .catch(err => {
-      logger.error(err.message);
+    .catch(({message}) => {
+      logger.error(message);
 
       // Register back a failed attempt.
       return done(new Error(JSON.stringify(err)));
