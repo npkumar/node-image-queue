@@ -1,14 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-
-const multer = require('multer');
-const upload = multer({
-  dest: `${process.cwd() + path.sep }public${ path.sep }images`,
-});
 
 const client = require('../services/redis');
 const queue = require('../services/queue');
+const upload = require('../services/upload');
 const logger = require('../utils/logger');
 
 /**
@@ -19,7 +14,7 @@ router.get('/:id/thumbnail', (req, res) => {
     .then(data => {
       if (data === null) {
         // Returns 404
-        res.boom.notFound('ID not found. Please try later!');
+        res.boom.notFound('Image ID not found!');
       } else if (data === '') {
         // Accepted. But image is not ready yet.
         res.status(202).json({
@@ -39,12 +34,10 @@ router.get('/:id/thumbnail', (req, res) => {
  *
  */
 router.post('/', upload.single('image'), (req, res) => {
+  const [filename, extension] = req.file.filename.split('.');
   try {
     // Create an image job
-    queue.create('image', {
-      filename: req.file.filename,
-      extension: 'jpg',
-    })
+    queue.create('image', {filename, extension})
       .removeOnComplete(true) // Remove job from queue if completed.
       .attempts(5) // Max retries for the job
       .backoff({delay: 60*1000, type: 'exponential'})
@@ -54,14 +47,14 @@ router.post('/', upload.single('image'), (req, res) => {
       .on('failed', err => logger.error(`Job failed: ${err}`));
 
     // Set empty value for ID. This indicates that image is being processed.
-    client.setAsync(req.file.filename, '');
+    client.setAsync(filename, '');
   } catch (err) {
     // Respond with 500 internal error
     res.boom.badImplementation(err.message);
   }
 
   // Send status 200 with ID for image.
-  res.json({id: req.file.filename});
+  res.json({id: filename});
 });
 
 module.exports = router;
