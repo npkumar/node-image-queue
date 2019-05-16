@@ -59,15 +59,7 @@ router.post('/', upload.single('image'), (req, res) => {
   const [filename, extension] = req.file.filename.split('.');
   try {
     // Create an image job
-    logger.info(`Creating a`);
-    queue.create('image', {filename, extension})
-      .removeOnComplete(true) // Remove job from queue if completed.
-      .attempts(5) // Max retries for the job
-      .backoff({delay: 60*1000, type: 'exponential'}) // re-attempt delay.
-      .save() // Save to redis.
-      .on('complete', result => logger.info(`Job completed with data ${result}`))
-      .on('progress', (progress, data) => logger.info(`\r  job #${job.id} ${progress}% complete with data ${data}`))
-      .on('failed', err => logger.error(`Job failed: ${err}`));
+    queue.createJob(filename, extension);
 
     // Set empty value for ID. This indicates that image is being processed.
     client.setAsync(filename, '');
