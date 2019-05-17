@@ -5,6 +5,9 @@ const {stub, assert, match} = require('sinon');
 const redis = require('redis');
 const request = require('supertest');
 
+const logger = require('../../utils/logger');
+const loggerErrorStub = stub(logger, 'error');
+
 const redisStubCreateClientStub = stub(redis, 'createClient');
 const redisClientSetAsyncStub = stub().resolves();
 const redisClientGetAsyncStub = stub().resolves('longurl');
@@ -37,8 +40,9 @@ describe('Images API', () => {
   });
 
   describe('POST /image', () => {
+    const imagePath = `${process.cwd()}${path.sep}test${path.sep}routes${path.sep}img${path.sep}cat.jpeg`;
+
     it('should return id of image', done => {
-      const imagePath = `${process.cwd()}${path.sep}test${path.sep}routes${path.sep}img${path.sep}cat.jpeg`;
       request(app)
         .post('/image')
         .attach('image', imagePath)
@@ -54,11 +58,33 @@ describe('Images API', () => {
           done();
         });
     });
+
+    it('should return 400 if image not attached', done => {
+      request(app)
+        .post('/image')
+        .end((err, res) => {
+          expect(res.status).to.equal(400);
+          expect(res.body.message).to.equal('Please attach an image');
+          done();
+        });
+    });
+
+    it('should return 500 if createJob fails', done => {
+      queueCreateJobStub.rejects(new Error());
+      request(app)
+        .post('/image')
+        .attach('image', imagePath)
+        .end((err, res) => {
+          expect(res.status).to.equal(500);
+          done();
+        });
+    });
   });
 
   after(() => {
     redisStubCreateClientStub.restore();
     kueCreateQueueStub.restore();
     queueCreateJobStub.restore();
+    loggerErrorStub.restore();
   });
 });
