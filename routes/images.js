@@ -18,6 +18,8 @@ const logger = require('../utils/logger');
  * @apiSuccess {Object}  data           PNG thumbnail information.
  * @apiSuccess {String}  data.message   Image is still being processed. Status message.
  *
+ * @apiSuccess 202 Accepted. Image is being processed.
+ *
  * @apiError 404 Request image Id is not found.
  * @apiError 500 Server error.
  */
@@ -26,20 +28,26 @@ router.get('/:id/thumbnail', (req, res) => {
   return client.getAsync(imageId)
     .then(data => {
       if (data === null) {
-        // Returns 404
-        logger.debug(`Image ID ${imageId} not found!`);
-        return res.boom.notFound(`Image ID ${imageId} not found!`);
+        throw new Error('ImageIDNotFound');
       } else if (data === '') {
-        // Accepted. But image is not ready yet.
-        logger.debug(`Image ${imageId} is being processed. Please try again later!`);
-        return res.status(202).json({
-          message: `Image ${imageId} is being processed. Please try again later!`,
-        });
+        throw new Error('ImageBeingProcessed');
       } else {
         res.json({url: data});
       }
     })
     .catch(({message}) => {
+      if (message === 'ImageIDNotFound') {
+        // Returns 404
+        logger.debug(`Image ID ${imageId} not found!`);
+        return res.boom.notFound(`Image ID ${imageId} not found!`);
+      } else if (message === 'ImageBeingProcessed') {
+        // Accepted. But image is not ready yet.
+        const errorResponse =`Image ${imageId} is being processed. Please try again later!`;
+        logger.debug(errorResponse);
+        return res.status(202).json({
+          message: errorResponse,
+        });
+      }
       // Respond with 500 internal error
       logger.error(message);
       res.boom.badImplementation(message);

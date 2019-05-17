@@ -37,6 +37,47 @@ describe('Images API', () => {
           done();
         });
     });
+
+    it('should return 202 if image is still being processed', done => {
+      redisClientGetAsyncStub.resolves('');
+      request(app)
+        .get('/image/uniqueId/thumbnail')
+        .end((err, res) => {
+          if (err) {
+            throw err;
+          };
+          expect(res.status).to.equal(202);
+          expect(res.body.message).to.equal('Image uniqueId is being processed. Please try again later!');
+          done();
+        });
+    });
+
+    it('should return 404 if image ID is not found', done => {
+      redisClientGetAsyncStub.resolves(null);
+      request(app)
+        .get('/image/uniqueId/thumbnail')
+        .end((err, res) => {
+          if (err) {
+            throw err;
+          };
+          expect(res.status).to.equal(404);
+          expect(res.body.message).to.equal('Image ID uniqueId not found!');
+          done();
+        });
+    });
+
+    it('should return 500 if `client.getAsync` fails', done => {
+      redisClientGetAsyncStub.rejects(new Error());
+      request(app)
+        .get('/image/uniqueId/thumbnail')
+        .end((err, res) => {
+          if (err) {
+            throw err;
+          };
+          expect(res.status).to.equal(500);
+          done();
+        });
+    });
   });
 
   describe('POST /image', () => {
