@@ -19,6 +19,8 @@ services:
       - ./:/var/www/app
     links:
       - redis
+    environment:
+      - REDIS_URL=redis://cache
     ports:
       - 3000:3000
 

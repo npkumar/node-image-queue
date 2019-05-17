@@ -41,7 +41,7 @@ const util = {
   unlinkSync: (filename, extension) => {
     try {
       // Remove uploaded file post processing.
-      fs.unlinkSync(this.getUploadPath(filename, extension));
+      fs.unlinkSync(util.getUploadPath(filename, extension));
     } catch ({message}) {
       logger.error(message);
     }

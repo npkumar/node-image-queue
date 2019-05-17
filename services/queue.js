@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 const util = require('../utils/util');
 const resizeImage = require('../utils/resize');
 
-const queue = kue.createQueue({redis: 'redis://cache:6379'});
+const queue = kue.createQueue({redis: process.env.REDIS_URL});
 
 const JOB_PROCESSING_CONCURRENCY = 2; // To be decided by actual usage.
 const JOB_FAILURE_ATTEMPTS = 2; // Max retries for the job
