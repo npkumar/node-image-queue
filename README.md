@@ -8,6 +8,8 @@ Worker job queue has been created using [Kue.JS](https://github.com/Automattic/k
 
 Error responses created using [Express Boom](https://www.npmjs.com/package/express-boom)
 
+Promise Library [Bluebird](http://bluebirdjs.com/docs/getting-started.html)
+
 Process manager for node application [PM2](http://pm2.keymetrics.io/)
 
 ### Known Issues
@@ -39,3 +41,11 @@ Runs the tests for application
 `npm install && npm run lint`
 
 Lints the code. eslint-config-google configuration has been extended.
+
+#### Endpoints
+`GET /image/:id/thumbnail` Request PNG thumbnail version of an image
+
+`POST /image/` Sumbit an image for processing to PNG thumbnail
+
+Full API Docs for routes can be found at `routes/images.js`
+
