@@ -1,4 +1,4 @@
-## Tegaki Service
+## Priority job queue implementation using Kue, Redis, Express
 
 Application has been bootstrapped using [Express Generator](https://expressjs.com/en/starter/generator.html)
 
